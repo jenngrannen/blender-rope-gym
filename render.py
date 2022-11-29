@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+import imageio
 
 from math import pi
 import os
@@ -112,16 +113,20 @@ def find_knot(num_segments, chain=False, depth_thresh=0.4, idx_thresh=3, pull_of
             return pull_idx, hold_idx, action_vec # Found! Return the pull, hold, and action
     return 16, 25, [0,0,0] # Didn't find a pull/hold
 
-def render_frame(frame, render_offset=0, step=2, filename="%06d_rgb.png", folder="images"):
+def render_frame(frame, render_offset=0, step=1, filename="%06d_rgb.png", folder="images"):
     global rig
     # Renders a single frame in a sequence (if frame%step == 0)
     frame -= render_offset
     if frame%step == 0:
         scene = bpy.context.scene
         index = frame//step
-        render_mask("image_masks/%06d_visible_mask.png", "images_depth/%06d_rgb.png", index)
-        scene.render.filepath = os.path.join(folder, filename) % index
+        # render_mask("image_masks/%06d_visible_mask.png", "images_depth/%06d_rgb.png", index)
+        full_filepath = os.path.join(folder, filename) % index
+        scene.render.filepath = full_filepath
         bpy.ops.render.render(write_still=True)
+        img = imageio.imread(full_filepath)
+        return img
+
 
 def render_mask(mask_filename, depth_filename, index):
     # NOTE: this method is still in progress
